@@ -7,7 +7,7 @@ The datasets are stored in [Synapse](https://synapse.org/synthetic), so you will
 python3 src/download_foregrounds.py --username 'your_synapse_username_here' --password 'your_password_here' --output-dir foregrounds
 python3 src/download_backgrounds.py --username 'your_synapse_username_here' --password 'your_password_here' --output-dir backgrounds
 ```
-Alternatively, foregrounds and backgrounds can also be downloaded from [here](https://synapse.org/synthetic).
+Alternatively, foregrounds and backgrounds can be examined and downloaded manually from [here](https://synapse.org/synthetic).
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This dataset is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
 
