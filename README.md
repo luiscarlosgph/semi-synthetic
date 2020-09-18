@@ -1,6 +1,12 @@
 # Introduction
 This repository contains code and data related to the paper "Image Compositing for Segmentation of Surgical Tools without Manual Annotations" by Luis Carlos Garcia Peraza Herrera et al.
 
+# Install dependencies
+```
+$ pip3 install opencv-python --user
+$ pip3 install numpy --user
+```
+
 # Download foreground and background datasets
 The datasets are stored in [Synapse](https://synapse.org/synthetic), so you will have to create an account prior to running these download scripts:
 ```
