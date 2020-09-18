@@ -6,6 +6,7 @@ This code has been tested in Ubuntu 16.04 and Ubuntu 18.04.
 
 # Install dependencies
 ```
+$ pip3 install synapseclient --user
 $ pip3 install opencv-python --user
 $ pip3 install numpy --user
 ```
