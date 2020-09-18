@@ -8,7 +8,7 @@ $ pip3 install numpy --user
 ```
 
 # Download foreground and background datasets
-The datasets are stored in [Synapse](https://synapse.org/synthetic), so you will have to create an account prior to running these download scripts:
+The datasets are stored in [Synapse](https://synapse.org/synthetic), so you will have to create an account prior to running these scripts:
 ```
 python3 src/download_foregrounds.py --username 'your_synapse_username_here' --password 'your_password_here' --output-dir foregrounds
 python3 src/download_backgrounds.py --username 'your_synapse_username_here' --password 'your_password_here' --output-dir backgrounds
