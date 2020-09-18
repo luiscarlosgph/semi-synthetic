@@ -1,2 +1,2 @@
-# semi-synthetic
-Image Compositing for Segmentation of Surgical Tools without Manual Annotations
+# Description
+This repository contains code and data related to the paper ""
