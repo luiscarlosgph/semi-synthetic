@@ -1,6 +1,9 @@
 # Introduction
 This repository contains code and data related to the paper "Image Compositing for Segmentation of Surgical Tools without Manual Annotations" by Luis Carlos Garcia Peraza Herrera et al.
 
+# Supported platforms
+This code has been tested in Ubuntu 16.04 and Ubuntu 18.04.
+
 # Install dependencies
 ```
 $ pip3 install opencv-python --user
