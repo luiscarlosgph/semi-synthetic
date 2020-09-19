@@ -7,7 +7,7 @@
 
 import numpy as np
 import cv2
-import blend_modes.blend_modes
+import blend_modes
 
 
 # 
@@ -56,7 +56,7 @@ def hard_light_blending(obj, mask, dst, cy, cx, opacity = 1.0):
 
     fg, bg, t_bg, l_bg, b_bg, r_bg, t_fg, l_fg, b_fg, r_fg = bm_preprocess(obj, mask, dst, cy, cx)    
 
-    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.blend_modes.hard_light(bg[t_bg:b_bg, 
+    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.hard_light(bg[t_bg:b_bg, 
         l_bg:r_bg,:], fg[t_fg:b_fg, l_fg:r_fg], opacity)
     bg = cv2.cvtColor(bg.astype(np.uint8), cv2.COLOR_RGBA2BGR)
 
@@ -76,7 +76,7 @@ def lighthen_only_blending(obj, mask, dst, cy, cx, opacity = 1.0):
 
     fg, bg, t_bg, l_bg, b_bg, r_bg, t_fg, l_fg, b_fg, r_fg = bm_preprocess(obj, mask, dst, cy, cx)    
     
-    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.blend_modes.lighten_only(bg[t_bg:b_bg, 
+    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.lighten_only(bg[t_bg:b_bg, 
         l_bg:r_bg,:], fg[t_fg:b_fg, l_fg:r_fg], opacity)
     bg = cv2.cvtColor(bg.astype(np.uint8), cv2.COLOR_RGBA2BGR)
     
@@ -96,7 +96,7 @@ def soft_light_blending(obj, mask, dst, cy, cx, opacity = 1.0):
     
     fg, bg, t_bg, l_bg, b_bg, r_bg, t_fg, l_fg, b_fg, r_fg = bm_preprocess(obj, mask, dst, cy, cx)    
 
-    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.blend_modes.soft_light(bg[t_bg:b_bg, 
+    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.soft_light(bg[t_bg:b_bg, 
         l_bg:r_bg,:], fg[t_fg:b_fg, l_fg:r_fg], opacity)
     bg = cv2.cvtColor(bg.astype(np.uint8), cv2.COLOR_RGBA2BGR)
     
@@ -116,7 +116,7 @@ def dodge_blending(obj, mask, dst, cy, cx, opacity = 1.0):
     
     fg, bg, t_bg, l_bg, b_bg, r_bg, t_fg, l_fg, b_fg, r_fg = bm_preprocess(obj, mask, dst, cy, cx)    
     
-    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.blend_modes.dodge(bg[t_bg:b_bg, l_bg:r_bg,:], 
+    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.dodge(bg[t_bg:b_bg, l_bg:r_bg,:], 
         fg[t_fg:b_fg, l_fg:r_fg], opacity)
     bg = cv2.cvtColor(bg.astype(np.uint8), cv2.COLOR_RGBA2BGR)
     
@@ -136,7 +136,7 @@ def addition_blending(obj, mask, dst, cy, cx, opacity = 1.0):
     
     fg, bg, t_bg, l_bg, b_bg, r_bg, t_fg, l_fg, b_fg, r_fg = bm_preprocess(obj, mask, dst, cy, cx)    
 
-    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.blend_modes.addition(bg[t_bg:b_bg, l_bg:r_bg,:], 
+    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.addition(bg[t_bg:b_bg, l_bg:r_bg,:], 
         fg[t_fg:b_fg, l_fg:r_fg], opacity)
     bg = cv2.cvtColor(bg.astype(np.uint8), cv2.COLOR_RGBA2BGR)
     
@@ -156,7 +156,7 @@ def darken_only_blending(obj, mask, dst, cy, cx, opacity = 1.0):
     
     fg, bg, t_bg, l_bg, b_bg, r_bg, t_fg, l_fg, b_fg, r_fg = bm_preprocess(obj, mask, dst, cy, cx)    
     
-    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.blend_modes.darken_only(bg[t_bg:b_bg, 
+    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.darken_only(bg[t_bg:b_bg, 
         l_bg:r_bg,:], fg[t_fg:b_fg, l_fg:r_fg], opacity)
     bg = cv2.cvtColor(bg.astype(np.uint8), cv2.COLOR_RGBA2BGR)
     
@@ -176,7 +176,7 @@ def multiply_blending(obj, mask, dst, cy, cx, opacity = 1.0):
     
     fg, bg, t_bg, l_bg, b_bg, r_bg, t_fg, l_fg, b_fg, r_fg = bm_preprocess(obj, mask, dst, cy, cx)    
 
-    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.blend_modes.multiply(bg[t_bg:b_bg, 
+    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.multiply(bg[t_bg:b_bg, 
         l_bg:r_bg,:], fg[t_fg:b_fg, l_fg:r_fg], opacity)
     bg = cv2.cvtColor(bg.astype(np.uint8), cv2.COLOR_RGBA2BGR)
     
@@ -196,7 +196,7 @@ def difference_blending(obj, mask, dst, cy, cx, opacity = 1.0):
     
     fg, bg, t_bg, l_bg, b_bg, r_bg, t_fg, l_fg, b_fg, r_fg = bm_preprocess(obj, mask, dst, cy, cx)    
     
-    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.blend_modes.difference(bg[t_bg:b_bg, 
+    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.difference(bg[t_bg:b_bg, 
         l_bg:r_bg,:], fg[t_fg:b_fg, l_fg:r_fg], opacity)
     bg = cv2.cvtColor(bg.astype(np.uint8), cv2.COLOR_RGBA2BGR)
     
@@ -216,7 +216,7 @@ def subtract_blending(obj, mask, dst, cy, cx, opacity = 1.0):
     
     fg, bg, t_bg, l_bg, b_bg, r_bg, t_fg, l_fg, b_fg, r_fg = bm_preprocess(obj, mask, dst, cy, cx)    
     
-    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.blend_modes.subtract(bg[t_bg:b_bg, 
+    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.subtract(bg[t_bg:b_bg, 
         l_bg:r_bg,:], fg[t_fg:b_fg, l_fg:r_fg], opacity)
     bg = cv2.cvtColor(bg.astype(np.uint8), cv2.COLOR_RGBA2BGR)
     
@@ -236,7 +236,7 @@ def grain_extract_blending(obj, mask, dst, cy, cx, opacity = 1.0):
     
     fg, bg, t_bg, l_bg, b_bg, r_bg, t_fg, l_fg, b_fg, r_fg = bm_preprocess(obj, mask, dst, cy, cx)    
     
-    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.blend_modes.grain_extract(bg[t_bg:b_bg, 
+    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.grain_extract(bg[t_bg:b_bg, 
         l_bg:r_bg,:], fg[t_fg:b_fg, l_fg:r_fg], opacity)
     bg = cv2.cvtColor(bg.astype(np.uint8), cv2.COLOR_RGBA2BGR)
     
@@ -256,7 +256,7 @@ def grain_merge_blending(obj, mask, dst, cy, cx, opacity = 1.0):
     
     fg, bg, t_bg, l_bg, b_bg, r_bg, t_fg, l_fg, b_fg, r_fg = bm_preprocess(obj, mask, dst, cy, cx)    
     
-    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.blend_modes.grain_merge(bg[t_bg:b_bg, 
+    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.grain_merge(bg[t_bg:b_bg, 
         l_bg:r_bg,:], fg[t_fg:b_fg, l_fg:r_fg], opacity)
     bg = cv2.cvtColor(bg.astype(np.uint8), cv2.COLOR_RGBA2BGR)
     
@@ -276,7 +276,7 @@ def divide_blending(obj, mask, dst, cy, cx, opacity = 1.0):
     
     fg, bg, t_bg, l_bg, b_bg, r_bg, t_fg, l_fg, b_fg, r_fg = bm_preprocess(obj, mask, dst, cy, cx)    
 
-    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.blend_modes.divide(bg[t_bg:b_bg, 
+    bg[t_bg:b_bg, l_bg:r_bg] = blend_modes.divide(bg[t_bg:b_bg, 
         l_bg:r_bg,:], fg[t_fg:b_fg, l_fg:r_fg], opacity)
     bg = cv2.cvtColor(bg.astype(np.uint8), cv2.COLOR_RGBA2BGR)
     
