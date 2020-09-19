@@ -753,7 +753,7 @@ def datetime_str(dt_format='%H_%M_%S__%d_%b_%Y'):
 #
 def convert_dict_to_html(dict_obj, indent=0):
     contents = '  ' * indent + "<ul>\n"
-    for k, v in dict_obj.iteritems():
+    for k, v in dict_obj.items():
         if isinstance(v, dict):
             contents += ('  ' * indent) + '<li>' + k + ': </li>'
             contents += convert_dict_to_html(v, indent + 1)

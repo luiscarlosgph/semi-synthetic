@@ -1533,7 +1533,7 @@ class CaffeinatedLabel(CaffeinatedAbstract):
         # Store the dictionary for class mappings after validating it
         classes_present = [False] * classes
         assert(len(class_map.keys()) == classes)
-        for k, v in class_map.iteritems():
+        for k, v in class_map.items():
             assert(isinstance(k, type(0)))
             assert(isinstance(v, type(0)))
             assert(k >= 0 and k <= 255)
@@ -1606,7 +1606,7 @@ class CaffeinatedLabel(CaffeinatedAbstract):
     @classmethod
     def from_network_output(cls, fmaps, name, classes, class_map):
         label_image = fmaps.argmax(axis=0).astype(np.uint8)
-        for k, v in class_map.iteritems():
+        for k, v in class_map.items():
             label_image[label_image == v] = k
         return cls(label_image, name, classes, class_map, fmaps)
 
@@ -1651,7 +1651,7 @@ class CaffeinatedLabel(CaffeinatedAbstract):
 
         # k is intensity
         # v is the class number
-        for k, v in self._class_map.iteritems():
+        for k, v in self._class_map.items():
             fmaps[v, self._raw_frame == k] = 1
 
         # if self._classes == 2:
@@ -1688,7 +1688,7 @@ class CaffeinatedLabel(CaffeinatedAbstract):
     # @returns an array_like, shape (h, w).
     def to_classes(self):
         class_index_frame = self._raw_frame.copy()
-        for k, v in self._class_map.iteritems():
+        for k, v in self._class_map.items():
             class_index_frame[self._raw_frame == k] = v
         return class_index_frame
 
@@ -1708,7 +1708,7 @@ class CaffeinatedLabel(CaffeinatedAbstract):
     #
     # @returns the intensity corresponding to the given class.
     def map_class_to_intensity(self, class_id):
-        return {v: k for k, v in self._class_map.iteritems()}[class_id]
+        return {v: k for k, v in self._class_map.items()}[class_id]
 
     #
     # @brief Retrieves a normalised probability map for a particular class.
