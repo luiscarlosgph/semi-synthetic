@@ -4,9 +4,10 @@ This repository contains code and data related to the paper "Image Compositing f
 # Supported platforms
 This code has been tested with Python 3.6 on Ubuntu 16.04 and Ubuntu 18.04.
 
-# Install dependencies
+# Dependencies
+* OpenCV 4 with support for Python 3 ([instructions to install it here](https://www.pyimagesearch.com/2018/08/15/how-to-install-opencv-4-on-ubuntu/)).
 ```
-$ pip3 install synapseclient opencv-python numpy keras_preprocessing albumentations noise imutils --user
+$ pip3 install synapseclient numpy keras_preprocessing albumentations noise imutils --user
 ```
 
 # Download foreground and background datasets
