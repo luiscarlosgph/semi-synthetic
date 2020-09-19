@@ -608,7 +608,7 @@ def load_json_as_dict(path):
 #
 # @returns a dictionary that contains the same values but of type() int.
 def convert_dict_to_int(data):
-    return {int(k): int(v) for k, v in data.iteritems()}
+    return {int(k): int(v) for k, v in data.items()}
 
 
 #
