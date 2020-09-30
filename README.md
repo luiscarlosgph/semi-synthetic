@@ -11,6 +11,7 @@ $ sudo apt install python3-opencv
 ```
 The rest of the dependencies can be installed with pip:
 ```
+$ sudo apt install python3-pip
 $ pip3 install synapseclient numpy keras_preprocessing albumentations noise imutils --user
 ```
 
