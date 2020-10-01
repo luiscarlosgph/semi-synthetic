@@ -840,8 +840,8 @@ class CustomBackend:
         if perc > 100:
             crop_h = int(round(raw_image.shape[0] / (perc / 100.)))
             crop_w = int(round(raw_image.shape[1] / (perc / 100.)))
-            crop_h_half = crop_h / 2
-            crop_w_half = crop_w / 2
+            crop_h_half = crop_h // 2
+            crop_w_half = crop_w // 2
 
             # Choose a random point in the tool as crop centre
             tool_pixels = np.nonzero(raw_label)
@@ -1501,7 +1501,6 @@ class Foreground:
     def __init__(self, frame, seg):
         assert(frame is not None)
         assert(seg is not None)
-
         self.frame = frame
         self.seg = seg
 
@@ -1545,23 +1544,7 @@ class Foreground:
         self.frame = image.CaffeinatedImage(new_im, self.frame.name)
         self.seg = image.CaffeinatedLabel(new_seg, self.seg.name, self.seg.classes,
             self.seg.class_map)
-
-    @property
-    def frame(self):
-        return self.frame
-
-    @property
-    def seg(self):
-        return self.seg
-
-    @frame.setter
-    def frame(self, frame):
-        self.frame = frame
-
-    @seg.setter
-    def seg(self, seg):
-        self.seg = seg
-
+    
     @property
     def shape(self):
         return self.frame.shape
@@ -1724,10 +1707,6 @@ class BlendedImageSet:
             dic_of_augmentations['blend_border'] = blend_border_param
         '''
 
-    @property
-    def blended_images(self):
-        return self.blended_images
-
 class ImageGenerator:
     """
     @class ImageGenerator generates images of background tissue with tools blended on top.
@@ -1757,7 +1736,6 @@ class ImageGenerator:
         self.blend_aug = blend_aug
 
     def load_fg(self, attempts=5):
-
         # There are some images in the dataset that do not have tools, this might be because the
         # images actually do not have tools, or because the HSV gilter + GrabCut failed
         failed = True

@@ -555,7 +555,7 @@ def laplacian_pyramid_blending(obj, mask, dst, cy, cx, num_levels = 5):
     gauss_pyr_obj = [gauss_obj]
     gauss_pyr_dst = [gauss_dst]
     gpM = [gauss_mask]
-    for i in xrange(num_levels):
+    for i in range(num_levels):
         gauss_obj = cv2.pyrDown(gauss_obj)
         gauss_dst = cv2.pyrDown(gauss_dst)
         gauss_mask = cv2.pyrDown(gauss_mask)
@@ -568,7 +568,7 @@ def laplacian_pyramid_blending(obj, mask, dst, cy, cx, num_levels = 5):
     lpA  = [gauss_pyr_obj[num_levels - 1]] 
     lpB  = [gauss_pyr_dst[num_levels - 1]]
     gpMr = [gpM[num_levels - 1]]
-    for i in xrange(num_levels - 1, 0, -1):
+    for i in range(num_levels - 1, 0, -1):
 
         sizeA = (gauss_pyr_obj[i - 1].shape[1], gauss_pyr_obj[i - 1].shape[0])
         sizeB = (gauss_pyr_dst[i - 1].shape[1], gauss_pyr_dst[i - 1].shape[0])
@@ -592,7 +592,7 @@ def laplacian_pyramid_blending(obj, mask, dst, cy, cx, num_levels = 5):
 
     # Now reconstruct
     ls_ = LS[0]
-    for i in xrange(1, num_levels):
+    for i in range(1, num_levels):
         ls_ = cv2.pyrUp(ls_, dstsize = (LS[i].shape[1], LS[i].shape[0]))
         ls_ = cv2.add(ls_, LS[i].astype(np.float32))
 

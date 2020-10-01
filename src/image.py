@@ -968,7 +968,7 @@ class CaffeinatedAbstract(object):
         rot_mat[0, 2] -= min_x
         rot_mat[1, 2] -= min_y
 
-        return cv2.warpAffine(im, rot_mat, (new_w, new_h), flags = interp)
+        return cv2.warpAffine(im, rot_mat, (new_w[0], new_h[0]), flags = interp)
 
     #
     # @brief Clockwise rotation plus crop (so that there is no extra added black background).
