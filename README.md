@@ -1,5 +1,5 @@
 # Introduction
-This repository contains code and data related to the paper "Image Compositing for Segmentation of Surgical Tools without Manual Annotations" by Luis Carlos Garcia Peraza Herrera et al.
+This repository contains code and data related to the paper ["Image Compositing for Segmentation of Surgical Tools without Manual Annotations" by Luis Carlos Garcia Peraza Herrera et al. TMI 2021](https://ieeexplore.ieee.org/document/9350303). Also available in [Arxiv](https://arxiv.org/abs/2102.09528).
 
 # Supported platforms
 This code has been tested with Python 3.6 on Ubuntu 16.04 and Ubuntu 18.04.
