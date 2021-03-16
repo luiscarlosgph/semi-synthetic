@@ -15,15 +15,15 @@ $ sudo apt install python3-opencv
 The rest of the dependencies can be installed with pip:
 ```
 $ sudo apt install python3-pip
-$ pip3 install synapseclient numpy keras_preprocessing albumentations noise imutils --user
+$ python3 -m pip install synapseclient numpy keras_preprocessing albumentations noise imutils --user
 ```
 
 Download foreground and background datasets
 -------------------------------------------
 The datasets are stored in [Synapse](https://synapse.org/synthetic), so you will have to create an account prior to running these scripts:
 ```
-python3 src/download_foregrounds.py --username 'your_synapse_username_here' --password 'your_password_here' --output-dir foregrounds
-python3 src/download_backgrounds.py --username 'your_synapse_username_here' --password 'your_password_here' --output-dir backgrounds
+$ python3 src/download_foregrounds.py --username 'your_synapse_username_here' --password 'your_password_here' --output-dir foregrounds
+$ python3 src/download_backgrounds.py --username 'your_synapse_username_here' --password 'your_password_here' --output-dir backgrounds
 ```
 Alternatively, foregrounds and backgrounds can be examined and downloaded manually from [here](https://synapse.org/synthetic).
 
