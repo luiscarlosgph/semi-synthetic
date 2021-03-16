@@ -4,7 +4,7 @@ This repository contains code and data related to the paper ["Image Compositing 
 
 Supported platforms
 -------------------
-This code has been tested with Python 3.6 on Ubuntu 16.04 and Ubuntu 18.04.
+This code has been tested with Python 3.8 on Ubuntu 20.04.
 
 Dependencies
 ------------
