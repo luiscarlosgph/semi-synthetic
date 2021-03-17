@@ -1,7 +1,7 @@
 """
 @brief   Common functions used for prototyping methods and handling data.
 @author  Luis Carlos Garcia-Peraza Herrera (luiscarlos.gph@gmail.com).
-@date    17 Mar 2017.
+@date    17 March 2017.
 """
 
 import sys
@@ -47,8 +47,6 @@ BLANKS_RE = r'(?:(?:[ \t\r\n])+)'
 # @details Credit to @joeld:
 #          http://stackoverflow.com/questions/287871/print-in-terminal-with-colors-using-python
 #
-
-
 class bcolours:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -58,7 +56,6 @@ class bcolours:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
-
 
 
 class Colour:
@@ -104,6 +101,7 @@ def rad_to_deg(r):
 # @returns a list of files and folders inside the given path.
 def listdir(path):
     return filter(None, sorted(os.listdir(path)))
+
 
 #
 # @brief Lists a directory removing the extension of the files and the hidden files.
@@ -925,7 +923,7 @@ def find_nearest_index(array, value):
 
 
 # This module cannot be executed as a script because it is not a script :)
-if __name__ == "__main__":
+if __name__ == '__main__':
     print(
         'Error, this module is not supposed to be executed by itself.',
         sys.stderr)
