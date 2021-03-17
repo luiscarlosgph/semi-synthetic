@@ -156,9 +156,6 @@ class Segmenter(object):
             grabcut_mask = gc.estimateSegmentationFromTrimap(im_bgra, mask, self.grabcut_gamma)
             mask = 255 * grabcut_mask
             
-            # The segmentation tends to be dilated, so we erode it a bit
-            mask = Segmenter.erode(mask)
-
         return mask
 
     def segment_and_save(self, input_files, output_files):
