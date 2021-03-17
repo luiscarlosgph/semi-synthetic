@@ -56,7 +56,7 @@ python3 src/chroma.py --input-dir demo_data/foregrounds --output-dir demo_data/f
   </tr>
 </table>
 
-If your foreground images have noise add ```--denoise 1```, and if they are interlaced, add ```--deinterlace 1```.
+If your foreground images have noise add ```--denoise 1```, and if they are interlaced, add ```--deinterlace 1``` (requires ffmpeg).
 
 Contact
 -------
