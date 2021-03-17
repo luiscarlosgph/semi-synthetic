@@ -40,7 +40,7 @@ Chroma key segmentation
 -----------------------
 If you want to generate your own foreground dataset, you can use the following command to segment your instruments over a chroma key:
 ```bash
-$ python3 src/chroma.py --input-dir demo_data --output-dir demo_data_output --min-hsv-thresh '[35, 70, 15]' --max-hsv-thresh '[95, 255, 255]' --grabcut 1
+python3 src/chroma.py --input-dir demo_data/foregrounds --output-dir demo_data/foregrounds_segmented --min-hsv-thresh '[35, 70, 15]' --max-hsv-thresh '[95, 255, 255]' --grabcut 1
 ```
 
 Contact
