@@ -158,6 +158,11 @@ class Segmenter(object):
             
         return mask
 
+    def _segment_and_save_worker(self, inputf, outputf):
+        im = cv2.imread(inputf)
+        mask = self.segment(im)
+        cv2.imwrite(outputf, mask)
+
     def segment_and_save(self, input_files, output_files):
         """
         @brief Segment a list of images.
@@ -166,10 +171,11 @@ class Segmenter(object):
                                   images.
         @returns nothing.
         """
+        pool = mp.Pool()
         for inputf, outputf in zip(input_files, output_files):
-            im = cv2.imread(inputf)
-            mask = self.segment(im)
-            cv2.imwrite(outputf, mask)
+            pool.apply_async(self._segment_and_save_worker, args=(inputf, outputf))
+        pool.close()
+        pool.join()
 
     @property
     def min_hsv_thresh(self):
