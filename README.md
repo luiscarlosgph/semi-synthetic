@@ -48,7 +48,7 @@ python3 src/chroma.py --input-dir demo_data/foregrounds --output-dir demo_data/f
   </tr>
   <tr>
     <td align="center">
-      <img src="https://github.com/luiscarlosgph/semi-synthetic/blob/main/demo_data/green.png?raw=true" width=205>
+      <img src="https://github.com/luiscarlosgph/semi-synthetic/blob/main/demo_data/foregrounds/green.png?raw=true" width=205>
     </td>
     <td align="center">
       <img src="https://github.com/luiscarlosgph/semi-synthetic/blob/main/demo_data/green_seg.png?raw=true" width=205>
