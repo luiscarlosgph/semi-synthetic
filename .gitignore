@@ -129,5 +129,7 @@ dmypy.json
 .pyre/
 
 # Folders of tool foregrounds and backgrounds
-foregrounds
-backgrounds
+/foregrounds
+/backgrounds
+
+/demo_data/foregrounds_segmented
