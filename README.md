@@ -12,7 +12,7 @@ Dependencies
 ```
 $ sudo apt install python3-opencv
 ```
-Alternatively, you can install from source following:
+Alternatively, you can install OpenCV from source following:
 ```bash
 # Install OpenCV dependencies
 $ sudo apt update
