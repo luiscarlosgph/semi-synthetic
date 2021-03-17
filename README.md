@@ -42,6 +42,19 @@ If you want to generate your own foreground dataset, you can use the following c
 ```bash
 python3 src/chroma.py --input-dir demo_data/foregrounds --output-dir demo_data/foregrounds_segmented --min-hsv-thresh '[35, 70, 15]' --max-hsv-thresh '[95, 255, 255]' --grabcut 1
 ```
+<table align="center">
+  <tr>
+    <td align="center">Image</td> <td align="center">Output</td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://github.com/luiscarlosgph/semi-synthetic/blob/main/demo_data/green.png?raw=true" width=205>
+    </td>
+    <td align="center">
+      <img src="https://github.com/luiscarlosgph/semi-synthetic/blob/main/demo_data/output.png?raw=true" width=205>
+    </td>
+  </tr>
+</table>
 
 Contact
 -------
