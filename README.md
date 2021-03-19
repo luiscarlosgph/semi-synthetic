@@ -84,7 +84,7 @@ This command is based on a simple HSV colour filtering. Run ```$ python3 src/chr
 
 1. ```--denoise 1```, blurs the images prior to segmentation. Needed for images captured with real endoscopes.
 2. ```--deinterlace 1``` (requires ffmpeg), use it for images captured with old endoscopes.
-3. ```--endo-padding 1```, removes the black endoscopic padding. 
+3. ```--endo-padding 1```, needed for endoscopic images, removes the black endoscopic padding surrounding the circular image area. 
 4. ```--num-inst 2```, specify the number of instruments (largest connected components kept).  
 5. ```--grabcut 1``` GrabCut postprocessing of the masks.
 
