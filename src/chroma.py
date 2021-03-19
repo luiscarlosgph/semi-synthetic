@@ -15,6 +15,7 @@ import tempfile
 # My imports
 import common
 import grabcut
+import endo
 
 
 class Segmenter(object):
@@ -22,7 +23,7 @@ class Segmenter(object):
 
     def __init__(self, min_hsv_thresh=[35, 70, 15], max_hsv_thresh=[95, 255, 255],
             deinterlace=False, denoise=False, use_grabcut=True, grabcut_maxiter=5,
-            grabcut_gamma=10):
+            grabcut_gamma=10, endo_padding=False, num_inst=None, debug=False):
         """
         @details The min_hsv_thresh and max_hsv_thresh can be a list of lists, in case that you
                  want to capture several colour ranges.
@@ -40,6 +41,9 @@ class Segmenter(object):
         self.use_grabcut = use_grabcut
         self.grabcut_maxiter = grabcut_maxiter
         self.grabcut_gamma = grabcut_gamma
+        self.endo_padding = endo_padding
+        self.num_inst=num_inst
+        self.debug = debug
 
     @staticmethod
     def deinterlace(im):
@@ -67,7 +71,7 @@ class Segmenter(object):
         return deinterlaced
     
     @staticmethod
-    def denoise(im, median_ksize=15, gaussian_ksize=5):
+    def denoise(im, median_ksize=21, gaussian_ksize=5):
         """
         @brief Denoise image to make colours more homogeneous.
         @param[in]  im              BGR input image.
@@ -76,7 +80,7 @@ class Segmenter(object):
         @returns a new filtered image.
         """
         denoised = cv2.medianBlur(im, median_ksize)
-        denoised = cv2.GaussianBlur(denoised, (gaussian_ksize, gaussian_ksize), cv2.BORDER_DEFAULT)
+        #denoised = cv2.GaussianBlur(denoised, (gaussian_ksize, gaussian_ksize), cv2.BORDER_DEFAULT)
         return denoised
     
     @staticmethod
@@ -109,25 +113,113 @@ class Segmenter(object):
         return mask
 
     @staticmethod
-    def dilate(mask):
-        kernel = np.ones((5, 5), np.uint8)
-        new_mask = cv2.dilate(mask, kernel, iterations=1)
-        return new_mask
-    
-    @staticmethod
-    def erode(mask):
-        kernel = np.ones((5, 5), np.uint8)
-        new_mask = cv2.erode(mask, kernel, iterations=1)
-        return new_mask
-
-    @staticmethod
     def fill_connected_components(mask): 
+        """
+        @param[in]  mask  np.ndarray of a mask with holes.
+        @returns a new mask with filled holes.
+        """
         not_mask = cv2.bitwise_not(mask)
         contour, hier = cv2.findContours(not_mask, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
         for cnt in contour:
             cv2.drawContours(not_mask, [cnt], 0, 255, -1)
         new_mask = cv2.bitwise_not(not_mask)
         return new_mask
+    
+    @staticmethod
+    def clahe(im):
+        """@returns the same image but with enhanced local contrast."""
+        lab = cv2.cvtColor(im, cv2.COLOR_BGR2LAB)
+        l, a, b = cv2.split(lab)
+        clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+        cl = clahe.apply(l)
+        lab = cv2.merge((cl, a, b))
+        new_im = cv2.cvtColor(lab, cv2.COLOR_LAB2BGR)
+
+        return new_im
+
+    @staticmethod
+    def correct_lighting(im):
+        height, width = im.shape[:2]
+
+        # Generating vignette mask using Gaussian kernels
+        kernel_x = cv2.getGaussianKernel(width, 150)
+        kernel_y = cv2.getGaussianKernel(height, 150)
+        kernel = kernel_y * kernel_x.T
+        mask = 255 * kernel / np.linalg.norm(kernel)
+
+        new_im = im.copy()
+        for i in range(3):
+            new_im[:, :, i] = new_im[:, :, i] / mask    
+
+        hsv = cv2.cvtColor(new_im, cv2.COLOR_BGR2HSV)
+        hsv = np.array(hsv, dtype = np.float64)
+        hsv[:, :, 1] = hsv[:, :, 1] * 1.3 
+        hsv[:, :, 1][hsv[:, :, 1] > 255]  = 255
+        hsv[:, :, 2] = hsv[:, :, 2] * 1.3 
+        hsv[:, :, 2][hsv[:, :, 2] > 255]  = 255
+        hsv = np.array(hsv, dtype = np.uint8)
+        new_im = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+        return new_im
+
+    @staticmethod
+    def convex_hull(mask):
+        """@returns the convex hull of a binary mask."""
+        new_mask = np.zeros_like(mask)
+
+        # Find the contours
+        contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        
+        # For each contour, find the convex hull and draw it
+        # on the original image.
+        for i in range(len(contours)):
+            hull = cv2.convexHull(contours[i])
+            cv2.drawContours(new_mask, [hull], -1, 255, -1)
+
+        return new_mask 
+
+    @staticmethod
+    def polycontour(mask, epsilon=0.001):
+        """
+        @param[in]  mask  Input segmentation binary mask (np.ndarray).
+        @param[in]  epsilon  Smaller epsilon makes the polinomial closer to the original contour.
+        @returns a mask whose contour has been fitted by a polinomial.
+        """
+        new_mask = np.zeros_like(mask)
+        contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        if len(contours) > 0:
+            # Find the contour of largest area
+            cnt = contours[0]
+            max_area = cv2.contourArea(cnt)
+            for cont in contours:
+                if cv2.contourArea(cont) > max_area:
+                    cnt = cont
+                    max_area = cv2.contourArea(cont)
+            
+            # Draw contour using a polynomial approximation
+            perimeter = cv2.arcLength(cnt, True)
+            approx = cv2.approxPolyDP(cnt, epsilon * perimeter, True)
+            cv2.drawContours(new_mask, [approx], -1, 255, -1)
+        return new_mask
+
+    @staticmethod
+    def smooth_contour(mask, ks=5):
+        """
+        @param[in]  mask  Input segmentation binary mask (np.ndarray).
+        @param[in]  ks    Smoothing kernel size.
+        @returns a new binary mask with smoother contours.
+        """
+        smooth = cv2.pyrUp(mask)
+        for i in range(15):
+            smooth = cv2.medianBlur(smooth, ks)
+        smooth = cv2.pyrDown(smooth) 
+        _, smooth = cv2.threshold(smooth, 200, 255, cv2.THRESH_BINARY)
+        return smooth
+
+    @staticmethod
+    def dilate(mask, ks=5, iterations=1):
+        kernel = np.ones((ks, ks), np.uint8)
+        dilated_mask = cv2.dilate(mask, kernel, iterations=1)
+        return dilated_mask
 
     def segment(self, im):
         """
@@ -142,20 +234,37 @@ class Segmenter(object):
 
         # Denoise
         denoised_im = Segmenter.denoise(im) if self.denoise else im
-
+        
         # Get HSV-based segmentation mask
         mask = Segmenter.hsv_bg_remove(denoised_im, self.min_hsv_thresh, self.max_hsv_thresh)
         
+        # Mark the pixels outside the endoscopic view as background
+        endomask = None
+        if self.endo_padding:
+            endoseg = endo.Segmenter()
+            endomask = endoseg.segment(denoised_im)
+            mask = cv2.bitwise_and(mask, endomask)
+        
+        # Grabcut post-processing
         if self.use_grabcut:
-            # Mark all foreground pixels as 'unknown'
-            mask[mask == 255] = 128 
+            # Preprocess mask for GrabCut marking background pixels as 'unknown'
+            mask[mask == 0] = 128
+
+            # The pixels outside the endoscopic area are set to sure background
+            if endomask is not None:
+                mask[endomask == 0] = 0
 
             # GrabCut segmentation
-            im_bgra = cv2.cvtColor(im, cv2.COLOR_BGR2BGRA)
+            bgra_im = cv2.cvtColor(im, cv2.COLOR_BGR2BGRA)
             gc = grabcut.GrabCut(self.grabcut_maxiter)
-            grabcut_mask = gc.estimateSegmentationFromTrimap(im_bgra, mask, self.grabcut_gamma)
+            grabcut_mask = gc.estimateSegmentationFromTrimap(bgra_im, mask, self.grabcut_gamma)
             mask = 255 * grabcut_mask
-            
+
+        # If the user specifies the number of instruments, we only consider the 
+        # self.num_inst largest connected components
+        if self.num_inst is not None:
+            mask = endo.Segmenter.largest_cc_mask(mask, ncc=self.num_inst)
+
         return mask
 
     def _segment_and_save_worker(self, inputf, outputf):
@@ -171,11 +280,15 @@ class Segmenter(object):
                                   images.
         @returns nothing.
         """
-        pool = mp.Pool()
-        for inputf, outputf in zip(input_files, output_files):
-            pool.apply_async(self._segment_and_save_worker, args=(inputf, outputf))
-        pool.close()
-        pool.join()
+        if self.debug:
+            for inputf, outputf in zip(input_files, output_files):
+                self._segment_and_save_worker(inputf, outputf)
+        else:
+            pool = mp.Pool()
+            for inputf, outputf in zip(input_files, output_files):
+                pool.apply_async(self._segment_and_save_worker, args=(inputf, outputf))
+            pool.close()
+            pool.join()
 
     @property
     def min_hsv_thresh(self):
@@ -221,7 +334,8 @@ def parse_command_line_parameters(parser):
                                      segmentation.""",
         '--denoise':              'Set it to one to denoise the image before the HSV segmentation.',
         '--debug':                """Set it to 1 to go in debug mode, i.e. no parallel image 
-                                     generation."""
+                                     generation.""",
+        '--endo-padding':         'Set it to 1 to ignore the black endoscopic padding.',
     }
 
     # Mandatory parameters
@@ -243,6 +357,7 @@ def parse_command_line_parameters(parser):
         help=msg['--refine-existing-mask'])
     parser.add_argument('--denoise', required=False, default=False, help=msg['--denoise'])
     parser.add_argument('--debug', required=False, default=False, help=msg['--debug'])
+    parser.add_argument('--endo-padding', required=False, default=False, help=msg['--endo-padding'])
     
     # Parse command line
     args = parser.parse_args()
@@ -273,6 +388,7 @@ def validate_cmd_param(args):
     assert(int(args.denoise) == 0 or int(args.denoise) == 1)
     assert(float(args.centre_crop) >= 0.0)
     assert(bool(int(args.debug)) == False or bool(int(args.debug)) == True)
+    assert(bool(int(args.endo_padding)) == False or bool(int(args.endo_padding)) == True)
 
 
 def convert_args_to_correct_datatypes(args):
@@ -291,6 +407,7 @@ def convert_args_to_correct_datatypes(args):
     args.refine_existing_mask = bool(int(args.refine_existing_mask))
     args.centre_crop = float(args.centre_crop)
     args.debug = bool(int(args.debug))
+    args.endo_padding = bool(int(args.endo_padding))
 
 
 def build_prior_list(image_list, seg_suffix, seg_ext='.png'):
@@ -344,7 +461,8 @@ def main():
     # Segment all the images and store the results in the output folder
     segmenter = Segmenter(min_hsv_thresh=args.min_hsv_thresh, 
         max_hsv_thresh=args.max_hsv_thresh, deinterlace=args.deinterlace, denoise=args.denoise,
-        use_grabcut=args.grabcut)
+        use_grabcut=args.grabcut, endo_padding=args.endo_padding, num_inst=args.num_inst,
+        debug=args.debug)
     segmenter.segment_and_save(image_list, seg_list)
 
     actual_output_list = common.listdir_absolute_no_hidden(args.output_dir)
