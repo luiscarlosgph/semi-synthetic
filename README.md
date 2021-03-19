@@ -81,6 +81,7 @@ python3 src/chroma.py --input-dir demo_data/foregrounds --output-dir demo_data/f
   </tr>
 </table>
 This command is based on a simple HSV colour filtering.
+
 Run `$ python3 src/chroma.py --help` to print the usage information. Typical options are:
 
 1. `--denoise 1` Blurs the images prior to segmentation. Needed for images captured with real endoscopes.
