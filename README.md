@@ -80,8 +80,13 @@ python3 src/chroma.py --input-dir demo_data/foregrounds --output-dir demo_data/f
     </td>
   </tr>
 </table>
+This command is based on a simple HSV colour filtering. Run ```$ python3 src/chroma.py --help``` to print the usage information. Typical options are:
 
-If your foreground images have noise add ```--denoise 1```, and if they are interlaced, add ```--deinterlace 1``` (requires ffmpeg).
+1. ```--denoise 1```, blurs the images prior to segmentation. Needed for images captured with real endoscopes.
+2. ```--deinterlace 1``` (requires ffmpeg), use it for images captured with old endoscopes.
+3. ```--endo-padding 1```, removes the black endoscopic padding. 
+4. ```--num-inst 2```, specify the number of instruments (largest connected components kept).  
+5. ```--grabcut 1``` GrabCut postprocessing of the masks.
 
 Contact
 -------
