@@ -23,7 +23,7 @@ class Segmenter(object):
 
     def __init__(self, min_hsv_thresh=[35, 70, 15], max_hsv_thresh=[95, 255, 255],
             deinterlace=False, denoise=False, use_grabcut=True, grabcut_maxiter=5,
-            grabcut_gamma=10, endo_padding=False, num_inst=None, debug=False):
+            grabcut_gamma=10, endo_padding=False, num_inst=None, blend=False, debug=False):
         """
         @details The min_hsv_thresh and max_hsv_thresh can be a list of lists, in case that you
                  want to capture several colour ranges.
@@ -43,6 +43,7 @@ class Segmenter(object):
         self.grabcut_gamma = grabcut_gamma
         self.endo_padding = endo_padding
         self.num_inst=num_inst
+        self.blend = blend
         self.debug = debug
 
     @staticmethod
@@ -221,6 +222,80 @@ class Segmenter(object):
         dilated_mask = cv2.dilate(mask, kernel, iterations=1)
         return dilated_mask
 
+    def run_grabcut(self, im, mask, endomask):
+        """
+        @param[in]  im        BGR image to be segmented.
+        @param[in]  mask      Binary scribble.
+        @param[in]  endomask  Segmentation mask of the endoscopic area (usually a circle).
+        @returns the postprocessed segmentation mask.
+        """
+        new_mask = np.zeros_like(mask)
+
+        # Preprocess mask for GrabCut marking background pixels as 'unknown'
+        new_mask[mask == 0] = 128    # Unknown
+        new_mask[mask == 255] = 255  # Sure foreground
+
+        # The pixels outside the endoscopic area are set to sure background
+        if endomask is not None:
+            new_mask[endomask == 0] = 0  # Sure background
+
+        # GrabCut segmentation
+        bgra_im = cv2.cvtColor(im, cv2.COLOR_BGR2BGRA)
+        gc = grabcut.GrabCut(self.grabcut_maxiter)
+        grabcut_mask = gc.estimateSegmentationFromTrimap(bgra_im, new_mask, self.grabcut_gamma)
+        new_mask = 255 * grabcut_mask
+        return new_mask
+    
+    @staticmethod
+    def alpha_compositing(frame, mask, foreground_value=None, alpha=0.2, 
+            overlay_colour=[255, 255, 0]):
+        """
+        @brief   Function that performs the alpha compositing between an image and a binary mask.
+        @details The output image will show a greenish mask over the frame provided.
+    
+        @param[in] frame            OpenCV BGR frame, shape (height, width, 3).
+        @param[in] mask             Binary mask of the tool. Shape (height, width).
+        @param[in] foreground_value The pixel value that represents the foreground (typically 1 
+                                    or 255). 
+        @param[in] alpha            Weight of the BGR image.
+        @param[in] beta             Weight of the greenish mask. 
+    
+        @returns the original image with a colour overlay blent on top of the segmented pixels.
+        """
+        assert frame.shape[0] == mask.shape[0]  
+        assert frame.shape[1] == mask.shape[1]  
+        assert frame.shape[2] == 3
+        assert len(mask.shape) == 2
+
+        # If foreground value is None then there should be only one unique value different from 
+        # zero in the segmentation mask
+        if foreground_value is None:
+            assert(len(np.unique(mask)) == 2)
+            foreground_value = np.sort(np.unique(mask))[1]
+        
+        # Remove multi-class labels
+        mask = mask.copy()
+        mask[mask != foreground_value] = 0
+        
+        # Create green mask
+        green_mask = np.zeros_like(frame)
+        green_mask[mask == foreground_value] = overlay_colour
+
+        # Overlay green mask over the image
+        overlay = np.rint(alpha * green_mask + (1.0 - alpha) * frame)
+        segmented_image = frame.copy()
+        segmented_image[mask == foreground_value] = overlay[mask == foreground_value]
+
+        # Find blob contours
+        cnts, _ = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        
+        # Draw the the contours over the image (no blending)
+        border_colour = [max(min(x - 100, 255), 0) for x in overlay_colour]
+        for c in cnts:
+            cv2.drawContours(segmented_image, [c], -1, overlay_colour, 1)
+
+        return segmented_image
+
     def segment(self, im):
         """
         @brief Binary segmentation of the objects on top of the chroma key.
@@ -247,23 +322,16 @@ class Segmenter(object):
         
         # Grabcut post-processing
         if self.use_grabcut:
-            # Preprocess mask for GrabCut marking background pixels as 'unknown'
-            mask[mask == 0] = 128
-
-            # The pixels outside the endoscopic area are set to sure background
-            if endomask is not None:
-                mask[endomask == 0] = 0
-
-            # GrabCut segmentation
-            bgra_im = cv2.cvtColor(im, cv2.COLOR_BGR2BGRA)
-            gc = grabcut.GrabCut(self.grabcut_maxiter)
-            grabcut_mask = gc.estimateSegmentationFromTrimap(bgra_im, mask, self.grabcut_gamma)
-            mask = 255 * grabcut_mask
+           mask = self.run_grabcut(im, mask, endomask) 
 
         # If the user specifies the number of instruments, we only consider the 
         # self.num_inst largest connected components
         if self.num_inst is not None:
             mask = endo.Segmenter.largest_cc_mask(mask, ncc=self.num_inst)
+
+        # If chosen by the user, blend segmentation on top of the original image
+        if self.blend: 
+            mask = Segmenter.alpha_compositing(im, mask)
 
         return mask
 
@@ -336,6 +404,7 @@ def parse_command_line_parameters(parser):
         '--debug':                """Set it to 1 to go in debug mode, i.e. no parallel image 
                                      generation.""",
         '--endo-padding':         'Set it to 1 to ignore the black endoscopic padding.',
+        '--blend':                'Blend the segmentation on top of the image.',
     }
 
     # Mandatory parameters
@@ -358,6 +427,7 @@ def parse_command_line_parameters(parser):
     parser.add_argument('--denoise', required=False, default=False, help=msg['--denoise'])
     parser.add_argument('--debug', required=False, default=False, help=msg['--debug'])
     parser.add_argument('--endo-padding', required=False, default=False, help=msg['--endo-padding'])
+    parser.add_argument('--blend', required=False, default=False, help=msg['--blend'])
     
     # Parse command line
     args = parser.parse_args()
@@ -462,7 +532,7 @@ def main():
     segmenter = Segmenter(min_hsv_thresh=args.min_hsv_thresh, 
         max_hsv_thresh=args.max_hsv_thresh, deinterlace=args.deinterlace, denoise=args.denoise,
         use_grabcut=args.grabcut, endo_padding=args.endo_padding, num_inst=args.num_inst,
-        debug=args.debug)
+        debug=args.debug, blend=args.blend)
     segmenter.segment_and_save(image_list, seg_list)
 
     actual_output_list = common.listdir_absolute_no_hidden(args.output_dir)
