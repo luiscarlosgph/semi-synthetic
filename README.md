@@ -89,6 +89,7 @@ Run `$ python3 src/chroma.py --help` to print the usage information. Typical opt
 3. `--endo-padding 1` Needed for endoscopic images, removes the black endoscopic padding surrounding the circular image area. 
 4. `--num-inst 2` Used to specify the number of instruments (largest connected components kept).  
 5. `--grabcut 1` GrabCut postprocessing of the masks.
+6. `--with-holes 1` Activate it if the foreground instruments contain holes.
 
 Contact
 -------
