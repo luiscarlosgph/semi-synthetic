@@ -23,7 +23,8 @@ class Segmenter(object):
 
     def __init__(self, min_hsv_thresh=[35, 70, 15], max_hsv_thresh=[95, 255, 255],
             deinterlace=False, denoise=False, use_grabcut=True, grabcut_maxiter=5,
-            grabcut_gamma=10, endo_padding=False, num_inst=None, blend=False, debug=False):
+            grabcut_gamma=10, endo_padding=False, num_inst=None, blend=False, debug=False,
+            with_holes=False):
         """
         @details The min_hsv_thresh and max_hsv_thresh can be a list of lists, in case that you
                  want to capture several colour ranges.
@@ -33,6 +34,12 @@ class Segmenter(object):
         @param[in]  max_hsv_thresh  Same as above but with the upper bounds of the HSV threshold.
                                     The default value is [95, 255, 255], which works for green
                                     screens.
+        @param[in]  with_holes      Connected component analysis (CC) is used to segment the 
+                                    foreground. Hence, the holes inside the foreground indstruments 
+                                    are closed.
+                                    If this option is activated, an AND is performed between the 
+                                    HSV-based segmentation and the one coming from the CC analysis
+                                    so that those wholes with the colour of the background are kept.
         """
         self._min_hsv_thresh = min_hsv_thresh
         self._max_hsv_thresh = max_hsv_thresh 
@@ -45,6 +52,7 @@ class Segmenter(object):
         self.num_inst=num_inst
         self.blend = blend
         self.debug = debug
+        self.with_holes = with_holes
 
     @staticmethod
     def deinterlace(im):
@@ -303,6 +311,8 @@ class Segmenter(object):
         @returns a numpy.ndarray of shape (h, w) and type np.uint8 with a label of 0 for the
                  chroma key and 255 for the foreground objects.
         """
+        mask = None
+
         # Deinterlace
         if self.deinterlace:
             im = Segmenter.deinterlace(im)
@@ -311,23 +321,31 @@ class Segmenter(object):
         denoised_im = Segmenter.denoise(im) if self.denoise else im
         
         # Get HSV-based segmentation mask
-        mask = Segmenter.hsv_bg_remove(denoised_im, self.min_hsv_thresh, self.max_hsv_thresh)
+        hsv_mask = Segmenter.hsv_bg_remove(denoised_im, self.min_hsv_thresh, self.max_hsv_thresh)
         
         # Mark the pixels outside the endoscopic view as background
         endomask = None
+        hsv_and_endomask = hsv_mask
         if self.endo_padding:
             endoseg = endo.Segmenter()
             endomask = endoseg.segment(denoised_im)
-            mask = cv2.bitwise_and(mask, endomask)
-        
+            hsv_and_endomask = cv2.bitwise_and(hsv_mask, endomask)
+        mask = hsv_and_endomask.copy()
+ 
         # Grabcut post-processing
         if self.use_grabcut:
-           mask = self.run_grabcut(im, mask, endomask) 
+            mask = self.run_grabcut(im, mask, endomask)
 
         # If the user specifies the number of instruments, we only consider the 
         # self.num_inst largest connected components
         if self.num_inst is not None:
             mask = endo.Segmenter.largest_cc_mask(mask, ncc=self.num_inst)
+
+        # If the user indicates that the instrument[s] has holes, we compute the logical AND with
+        # the HSV-based segmentation, which tends to capture well the chroma that is visible 
+        # across the holes of the instruments
+        if self.with_holes:
+            mask = cv2.bitwise_and(mask, hsv_and_endomask)
 
         # If chosen by the user, blend segmentation on top of the original image
         if self.blend: 
@@ -405,6 +423,8 @@ def parse_command_line_parameters(parser):
                                      generation.""",
         '--endo-padding':         'Set it to 1 to ignore the black endoscopic padding.',
         '--blend':                'Blend the segmentation on top of the image.',
+        '--with-holes':           """If activated, it is assumed that the instruments might have 
+                                     holes.""",
     }
 
     # Mandatory parameters
@@ -428,6 +448,7 @@ def parse_command_line_parameters(parser):
     parser.add_argument('--debug', required=False, default=False, help=msg['--debug'])
     parser.add_argument('--endo-padding', required=False, default=False, help=msg['--endo-padding'])
     parser.add_argument('--blend', required=False, default=False, help=msg['--blend'])
+    parser.add_argument('--with-holes', required=False, default=False, help=msg['--with-holes'])
     
     # Parse command line
     args = parser.parse_args()
@@ -532,7 +553,7 @@ def main():
     segmenter = Segmenter(min_hsv_thresh=args.min_hsv_thresh, 
         max_hsv_thresh=args.max_hsv_thresh, deinterlace=args.deinterlace, denoise=args.denoise,
         use_grabcut=args.grabcut, endo_padding=args.endo_padding, num_inst=args.num_inst,
-        debug=args.debug, blend=args.blend)
+        debug=args.debug, blend=args.blend, with_holes=args.with_holes)
     segmenter.segment_and_save(image_list, seg_list)
 
     actual_output_list = common.listdir_absolute_no_hidden(args.output_dir)
