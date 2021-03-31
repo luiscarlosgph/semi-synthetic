@@ -480,6 +480,7 @@ def validate_cmd_param(args):
     assert(float(args.centre_crop) >= 0.0)
     assert(bool(int(args.debug)) == False or bool(int(args.debug)) == True)
     assert(bool(int(args.endo_padding)) == False or bool(int(args.endo_padding)) == True)
+    assert(bool(int(args.with_holes)) == False or bool(int(args.with_holes)) == True)
 
 
 def convert_args_to_correct_datatypes(args):
@@ -499,6 +500,7 @@ def convert_args_to_correct_datatypes(args):
     args.centre_crop = float(args.centre_crop)
     args.debug = bool(int(args.debug))
     args.endo_padding = bool(int(args.endo_padding))
+    args.with_holes = bool(int(args.with_holes))
 
 
 def build_prior_list(image_list, seg_suffix, seg_ext='.png'):
