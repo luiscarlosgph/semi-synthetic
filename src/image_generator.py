@@ -1469,12 +1469,15 @@ class AugmentationEngine(object):
                     random.setstate(random_st0)
                     new_image[k] = augmented['image']
             else:
-                data = { 'image': raw_image, 'mask': raw_label }
+                data = { 'image': raw_image }
+                if raw_label is not None:
+                    data['mask'] = raw_label
                 augmented = augmentation(**data)
                 new_image = augmented['image']
 
-            # As the transformation should be the same for all blending modes we can get the last mask for all the images
-            new_label = augmented['mask']
+            # As the transformation should be the same for all blending modes 
+            # we can get the last mask for all the images
+            new_label = augmented['mask'] if raw_label is not None else None
 
         return new_image, new_label
 
